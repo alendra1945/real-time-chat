@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Chat Rooms</title>
+</head>
+<body>
+	masukan chat room yang ingin dimasuki <br>
+	<input type="text" id='input-room'><br>
+	<button id="btn-masuk">Masuk</button>
+
+<script type="text/javascript">
+	document.querySelector('#input-room').focus();
+	document.querySelector('#input-room').onkeyup=function(e){
+		if(e.keyCode==13){
+			document.querySelector('#btn-masuk').click();
+		}
+	};
+	document.querySelector('#btn-masuk').onclick=function(e){
+		let roomName=document.querySelector('#input-room').value;
+		window.location.pathname='/chat/'+roomName+'/';
+	};
+</script>
+</body>
+</html>

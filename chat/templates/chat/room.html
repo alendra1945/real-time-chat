@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Room Chat</title>
+</head>
+<body>
+	<ul id="chat-log">
+		
+	</ul><br>
+	<input type="text" id="chat-message" name="">
+	<button id="btn-send">Send</button>
+
+
+<script type="text/javascript">
+	let roomName= {{room_name_json}};
+	let username={{username}};
+	let chatSocket=new WebSocket('ws://'+ window.location.host+ '/ws/chat/'+roomName+'/'
+		);
+	chatSocket.onopen=function(e){
+		fetchMessages()
+	}
+	chatSocket.onmessage=function(e){
+		let data=JSON.parse(e.data);
+		if(data['command']=='messages'){
+			for(let i=0;i<data['messages'].length;i++){
+				createMessage(data['messages'][i]);
+			}
+		}else if(data['command']=='new_message'){
+			createMessage(data['message']);
+		}
+	};
+	chatSocket.onclose=function(e){
+		console.error('Chat Socked Closed')
+	};
+	document.querySelector('#chat-message').focus();
+
+	document.querySelector('#chat-message').onkeyup=function(e){
+		if (document.querySelector('#chat-message').value>0 && e.keyCode==13){
+			document.querySelector('#btn-send').click()
+		}
+	};
+
+	document.querySelector('#btn-send').onclick=function(e){
+		let messageinputdom=document.querySelector('#chat-message');
+		let message=messageinputdom.value;
+		chatSocket.send(JSON.stringify({
+			'message':message,
+			'command':'new_message',
+			'from':username
+		}));
+		messageinputdom.value='';
+	};
+	function fetchMessages(){
+		chatSocket.send(JSON.stringify({
+			'command':'fetch_messages'
+		}))
+	}
+	function createMessage(data){
+		let author=data['author']
+		let msgListTag=document.createElement('li');
+		let imgTag=document.createElement('img')
+		let pTag=document.createElement('p')
+		pTag.textContent=data.content +' ('+author+')'
+		if(author==username){
+			msgListTag.className='sent';
+		}else{
+			msgListTag.className='replies';
+		}
+		msgListTag.appendChild(pTag)
+		document.querySelector('#chat-log').appendChild(msgListTag);
+	}
+</script>
+</body>
+</html>
